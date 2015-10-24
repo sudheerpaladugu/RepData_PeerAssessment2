@@ -1,19 +1,18 @@
 ---
-title: "Major storms and weather events that causes most harmful to health and greatest impact on economic, in the United States (since 1970 - 2011)"
+title: "Storm and Weather Events Data Analysis (collected since 1970 - 2011)"
 output: 
 html_document:
 keep_md: true
 ---
-###Reproducible Research: Peer Assessment 2###    
+###Reproducible Research: Peer Assessment 2       
 
-##Synopsis:##  
+##Synopsis:    
 Storm and Weather events causes harmful for population health and damage property which impacts country's economic conditions. U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database is the 
 collection of data from various parts of the country to study/analyze the cuases of more health and economic consequences to take preventive actions.  Results of this analysis address the following questions:  
 1. Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?  
-
 2. Across the United States, which types of events have the greatest economic consequences?  
 
-##Processing Data##   
+##Processing Data     
 
 The analysis was performed on [Storm Events Database]("http://www.ncdc.noaa.gov/stormevents/ftp.jsp"), provided by [National Climatic Data Center]("http://www.ncdc.noaa.gov/"). The data is from a comma-separated-value file available [here]("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"). There is also some documentation of the data available [here]("https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf").  
 
@@ -71,10 +70,7 @@ minDate <- min(prcdata$BGN_DATE)
 maxDate <- max(prcdata$BGN_DATE)
 #adding year column
 prcdata$YEAR <- as.integer(format(prcdata$BGN_DATE, "%Y"))
-
 hist(prcdata$YEAR, breaks = 45, main="Number of events recorded per year", xlab="Year", ylab="Number of events")
-
-#unique(prcdata$EVTYPE)
 ```
 
 
@@ -97,7 +93,7 @@ strmdata$EVTYPE <- evntlbls
 #unique(strmdata$EVTYPE)
 ```  
 
-##Data Analysis##  
+##Data Analysis  
 
 Subsetting wheather events which causes most harmful to population health and greatest economic consequences events from the data.  
 
@@ -109,7 +105,7 @@ hdata <- filter(strmdata,strmdata$FATALITIES > 0 | strmdata$INJURIES > 0)
 nrow(hdata)
 ```
 
-###Health Data Anasysis###  
+###Health Data Anasysis  
 
 ```{r echo=TRUE}
 #Fatalities events counts
@@ -123,8 +119,8 @@ injTop10 <- head(injcounts[order(injcounts$INJURIES, decreasing = T), ], 10)
 colnames(fatTop10) <- c("Event", "Fatalities")
 colnames(injTop10) <- c("Event", "Injuries")
 ```
-##Results##  
-###Health Data Top 10 records###    
+##Results  
+###Health Data Top 10 records   
 . Fatal Events    
 . Injury Events    
 
@@ -134,7 +130,7 @@ fatTop10
 injTop10
 ```
 
-###Health Data plots###  
+###Health Data plots  
 
 ```{r 'healthdata_plot', echo=TRUE}
 par(mfrow = c(1, 2), mar = c(14, 6, 4, 3), mgp = c(2, 1, 0), cex = 0.9)
@@ -150,7 +146,7 @@ text(x = fatalPlot, y = injTop10$Injuries, label = round(injTop10$Injuries, 0), 
 
 ```
 
-##Economic Data Analysis##  
+##Economic Data Analysis  
 
 ```{r 'EconomicData', echo=TRUE}
 #Economic consequence events data
@@ -182,15 +178,13 @@ convertCurrUnit <- function(e)
 }
 ```
 
-###Calculating Property and Corp damage dxpenses###  
+###Calculating Property and Corp damage dxpenses  
 
 ```{r 'economiccons', echo=TRUE}
 #Getting property damage
-prdamage <- sapply(edata$PROPDMGEXP, FUN=convertCurrUnit)
-edata$PROPDMG <- edata$PROPDMG * (10 ** prdamage)
+edata$PROPDMG <- edata$PROPDMG * (10 ** sapply(edata$PROPDMGEXP, FUN=convertCurrUnit))
 #Getting corp damage 
-crdamage <- sapply(edata$CROPDMGEXP, FUN=convertCurrUnit)
-edata$CROPDMG <- edata$CROPDMG * (10 ** crdamage)
+edata$CROPDMG <- edata$CROPDMG * (10 ** sapply(edata$CROPDMGEXP, FUN=convertCurrUnit))
 ```
 
 
@@ -206,8 +200,8 @@ crevntTop10 <- head(crcounts[order(crcounts$CROPDMG, decreasing = T), ], 10)
 colnames(prevntTop10) <- c("Event", "propDMG")
 colnames(crevntTop10) <- c("Event", "cropDMG")
 ```  
-###Reselts###  
-###Economic Data Top 10 records###    
+###Reselts  
+###Economic Data Top 10 records    
 . Property damage    
 . Corp damage  
 
@@ -215,7 +209,7 @@ colnames(crevntTop10) <- c("Event", "cropDMG")
 prevntTop10
 crevntTop10 
 ```  
-###Economic data plots###  
+###Economic data plots  
 
 ```{r echo=TRUE}
 par(mfrow = c(1, 2), mar = c(12, 5, 3, 2), mgp = c(3, 1, 0), cex = 0.8, las = 3)
