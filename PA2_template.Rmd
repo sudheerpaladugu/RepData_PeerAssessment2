@@ -1,0 +1,229 @@
+---
+title: "Major storms and weather events that causes most harmful to health and greatest impact on economic, in the United States (since 1970 - 2011)"
+output: 
+html_document:
+keep_md: true
+---
+###Reproducible Research: Peer Assessment 2###    
+
+##Synopsis:##  
+Storm and Weather events causes harmful for population health and damage property which impacts country's economic conditions. U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database is the 
+collection of data from various parts of the country to study/analyze the cuases of more health and economic consequences to take preventive actions.  Results of this analysis address the following questions:  
+1. Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?  
+
+2. Across the United States, which types of events have the greatest economic consequences?  
+
+##Processing Data##   
+
+The analysis was performed on [Storm Events Database]("http://www.ncdc.noaa.gov/stormevents/ftp.jsp"), provided by [National Climatic Data Center]("http://www.ncdc.noaa.gov/"). The data is from a comma-separated-value file available [here]("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"). There is also some documentation of the data available [here]("https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf").  
+
+Downloading data file
+```{r 'init', echo=TRUE}
+#setting local working directory
+setwd("C:/Data/devtools/Git/RepData_PeerAssessment2")
+library(knitr)
+library(ggplot2)
+#suppressMessages to suppress warning/ messages
+suppressMessages(library(dplyr))
+#setting working directory for knit
+opts_knit$set(base.dir = "C:/Data/devtools/Git/RepData_PeerAssessment2")
+stdata <- NULL
+```
+```{r 'downloaddatafile', echo=TRUE}
+#Checking for file in current directory
+if(!file.exists("PA2_StormData.bz2"))
+{
+        download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2",destfile = "PA2_StormData.bz2",mode = "wb")
+}
+
+```  
+Reading and checking data from file  
+```{r 'readingdata', echo=TRUE, cache=TRUE}
+#reading data from csv file
+stdata <- read.csv(bzfile("PA2_StormData.bz2"))
+#getting rows and columns count
+colnms <- names(stdata)
+#rows & columns
+rws <- nrow(stdata); cls <- ncol(stdata)
+
+```
+
+Data from file:    
+. Numer of rows **`r rws`**   
+. Number of columns **`r cls`**  
+
+Filtering required columns from dataframe for analysis. Ploting histogram to understand the data available for each year in U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database (from 1970-2011). 
+
+```{r global_opts, include=FALSE}
+knitr::opts_chunk$set(fig.width=20, fig.height=15, fig.path='figs/', warning=FALSE, message=FALSE)
+```
+
+```{r 'dataforanalysis', echo=TRUE}
+#getting required data for analysis
+prcdata <- stdata
+names(prcdata) <- toupper(names(prcdata))
+#getting required columns
+prcdata <- prcdata[,c("BGN_DATE", "EVTYPE", "FATALITIES", "INJURIES","PROPDMG","PROPDMGEXP","CROPDMG","CROPDMGEXP")]
+#formatting date
+prcdata <- mutate(prcdata, BGN_DATE = as.Date(as.character(prcdata$BGN_DATE), "%m/%d/%Y"))
+#Starting year
+minDate <- min(prcdata$BGN_DATE)
+maxDate <- max(prcdata$BGN_DATE)
+#adding year column
+prcdata$YEAR <- as.integer(format(prcdata$BGN_DATE, "%Y"))
+
+hist(prcdata$YEAR, breaks = 45, main="Number of events recorded per year", xlab="Year", ylab="Number of events")
+
+#unique(prcdata$EVTYPE)
+```
+
+
+Histogram results supporting the statement **The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years should be considered more complete.**
+
+Considerable measurements being collected from 1970 to 2011 by NOAA for major storms  and weather events.  
+Event type (EVTYPE) values should be edited/updated with proper charecter sequences and trailing spaces to get proper counts and labels from the data.  
+
+```{r 'harmful_events', echo=TRUE}
+#filtering data from 1970 to 2011
+strmdata <- filter(prcdata, YEAR >= 1970)
+#converting to lower case
+evntlbls <- toupper(strmdata$EVTYPE)
+## Replace all punct. characters with a space
+evntlbls <- gsub("(^[[:space:]]+|[[:space:]]+$)", "", evntlbls)
+evntlbls <- gsub("[[:blank:][:punct:]+]", " ", evntlbls)
+evntlbls <- gsub("^thunderstorm wind[:alnum:] | ^tstm wind[:alnum:]", "thunderstorm wind", evntlbls)
+#updating data with updated labels
+strmdata$EVTYPE <- evntlbls
+#unique(strmdata$EVTYPE)
+```  
+
+##Data Analysis##  
+
+Subsetting wheather events which causes most harmful to population health and greatest economic consequences events from the data.  
+
+##Major Weather Eevents harmful to Population Health##   
+```{r 'HealthData', echo=TRUE}
+#Getting harmful events data from dataframe
+hdata <- filter(strmdata,strmdata$FATALITIES > 0 | strmdata$INJURIES > 0)
+#harmful data rows count
+nrow(hdata)
+```
+
+###Health Data Anasysis###  
+
+```{r echo=TRUE}
+#Fatalities events counts
+fatcounts <- aggregate(FATALITIES ~ EVTYPE,data=hdata,FUN=sum)
+#InjuryEvents by aggregation
+injcounts <- aggregate(INJURIES ~ EVTYPE,data=hdata,FUN=sum)
+#Top ten records for FATALITIES and INJURIES
+fatTop10 <- head(fatcounts[order(fatcounts$FATALITIES, decreasing = T), ], 10)
+injTop10 <- head(injcounts[order(injcounts$INJURIES, decreasing = T), ], 10)
+# Updating column names
+colnames(fatTop10) <- c("Event", "Fatalities")
+colnames(injTop10) <- c("Event", "Injuries")
+```
+##Results##  
+###Health Data Top 10 records###    
+. Fatal Events    
+. Injury Events    
+
+
+```{r 'healthdata_results', echo=TRUE}
+fatTop10
+injTop10
+```
+
+###Health Data plots###  
+
+```{r 'healthdata_plot', echo=TRUE}
+par(mfrow = c(1, 2), mar = c(14, 6, 4, 3), mgp = c(2, 1, 0), cex = 0.9)
+
+ylim <- c(0, 1.1*max(fatTop10$Fatalities))
+
+fatalPlot <- barplot(fatTop10$Fatalities, names.arg = fatTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities', ylim = ylim)
+text(x = fatalPlot, y = fatTop10$Fatalities, label = round(fatTop10$Fatalities, 0), pos = 3, cex = 0.8)
+ylim <- c(0, 1.1*max(injTop10$Injuries))
+
+injuryPlot <- barplot(injTop10$Injuries, names.arg = injTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries', ylim = ylim)
+text(x = fatalPlot, y = injTop10$Injuries, label = round(injTop10$Injuries, 0), pos = 3, cex = 0.8)
+
+```
+
+##Economic Data Analysis##  
+
+```{r 'EconomicData', echo=TRUE}
+#Economic consequence events data
+edata <- filter(strmdata, strmdata$PROPDMG > 0 | strmdata$CROPDMG > 0)
+#economic data rows count
+nrow(edata)
+```
+
+```{r 'conversionFunction', echo=TRUE}
+#Function to convert damage amount unit:
+# h -> hundred, k -> thousand, m -> million, b -> billion
+convertCurrUnit <- function(e) 
+{
+        if (e %in% c('h', 'H')){
+                return(2)
+        } else if (e %in% c('k', 'K')) {
+                return(3)
+        } else if (e %in% c('m', 'M')) {
+                return(6)
+        } else if (e %in% c('b', 'B')) {
+                return(9)
+        } else if (!is.na(as.numeric(e))) {# if a digit
+                return(as.numeric(e))
+        } else if (e %in% c('', '-', '?', '+')) {
+                return(0)
+        } else {
+                stop("Not valid.")
+        }
+}
+```
+
+###Calculating Property and Corp damage dxpenses###  
+
+```{r 'economiccons', echo=TRUE}
+#Getting property damage
+prdamage <- sapply(edata$PROPDMGEXP, FUN=convertCurrUnit)
+edata$PROPDMG <- edata$PROPDMG * (10 ** prdamage)
+#Getting corp damage 
+crdamage <- sapply(edata$CROPDMGEXP, FUN=convertCurrUnit)
+edata$CROPDMG <- edata$CROPDMG * (10 ** crdamage)
+```
+
+
+```{r 'mosteconomicexpenses', echo=TRUE}
+# Fatal events
+prcounts <- aggregate(PROPDMG ~ EVTYPE,data=edata,FUN=sum)
+crcounts <- aggregate(CROPDMG ~ EVTYPE,data=edata,FUN=sum)
+# Events caused most economic expenses
+prevntTop10 <- head(prcounts[order(prcounts$PROPDMG, decreasing = T), ], 10)
+crevntTop10 <- head(crcounts[order(crcounts$CROPDMG, decreasing = T), ], 10)
+
+# Updating column names
+colnames(prevntTop10) <- c("Event", "propDMG")
+colnames(crevntTop10) <- c("Event", "cropDMG")
+```  
+###Reselts###  
+###Economic Data Top 10 records###    
+. Property damage    
+. Corp damage  
+
+```{r 'economicdata_results', echo=TRUE}
+prevntTop10
+crevntTop10 
+```  
+###Economic data plots###  
+
+```{r echo=TRUE}
+par(mfrow = c(1, 2), mar = c(12, 5, 3, 2), mgp = c(3, 1, 0), cex = 0.8, las = 3)
+
+prdmgplot <- barplot((prevntTop10$propDMG/1000000000), names.arg = prevntTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities (Billions)', log="y")
+crdmgplot <- barplot((crevntTop10$cropDMG/1000000000), names.arg = crevntTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries (Billions)', log="y")
+```  
+
+*Execute below script in commandline (or R console) to generate plot images and place them in './figure' folder  
+knit2html("PA2_template.Rmd", "PA2_template.html")*  
+
