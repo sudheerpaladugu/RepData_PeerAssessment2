@@ -54,7 +54,7 @@ Data from file:
 Filtering required columns from dataframe for analysis. Ploting histogram to understand the data available for each year in U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database (from 1970-2011). 
 
 ```{r global_opts, echo=TRUE}
-knitr::opts_chunk$set(fig.width=40, fig.height=15, fig.path='figs/', warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(fig.width=40, fig.height=20, fig.path='figs/', warning=FALSE, message=FALSE)
 ```
 
 ```{r 'dataforanalysis', echo=TRUE}
@@ -70,7 +70,8 @@ minDate <- min(prcdata$BGN_DATE)
 maxDate <- max(prcdata$BGN_DATE)
 #adding year column
 prcdata$YEAR <- as.integer(format(prcdata$BGN_DATE, "%Y"))
-hist(prcdata$YEAR, breaks = 45, main="Number of events recorded per year", xlab="Year", ylab="Number of events")
+opar=par(ps=26)
+hist(prcdata$YEAR, breaks = 45, main="Number of events recorded per year", xlab="Year", ylab="Number of events", cex=1.0, cex.main=2.5)
 ```
 
 
@@ -133,16 +134,16 @@ injTop10
 ###Health Data plots  
 
 ```{r 'healthdata_plot', echo=TRUE}
-par(mfrow = c(1, 2), mar = c(14, 6, 4, 3), mgp = c(2, 1, 0), cex = 0.9)
+par(mfrow = c(1, 2), mar = c(14, 6, 4, 3), mgp = c(2, 1, 0), cex = 1.0, cex.lab=2, cex.main=2.5)
 
 ylim <- c(0, 1.1*max(fatTop10$Fatalities))
 
-fatalPlot <- barplot(fatTop10$Fatalities, names.arg = fatTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities', ylim = ylim)
-text(x = fatalPlot, y = fatTop10$Fatalities, label = round(fatTop10$Fatalities, 0), pos = 3, cex = 0.8)
+fatalPlot <- barplot(fatTop10$Fatalities, names.arg = fatTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities', ylim = ylim, cex.axis = 2)
+text(x = fatalPlot, y = fatTop10$Fatalities, label = round(fatTop10$Fatalities, 0), pos = 3)
 ylim <- c(0, 1.1*max(injTop10$Injuries))
 
-injuryPlot <- barplot(injTop10$Injuries, names.arg = injTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries', ylim = ylim)
-text(x = fatalPlot, y = injTop10$Injuries, label = round(injTop10$Injuries, 0), pos = 3, cex = 0.8)
+injuryPlot <- barplot(injTop10$Injuries, names.arg = injTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries', ylim = ylim, cex.axis = 2)
+text(x = fatalPlot, y = injTop10$Injuries, label = round(injTop10$Injuries, 0), pos = 3)
 
 ```
 
@@ -212,7 +213,8 @@ crevntTop10
 ###Economic data plots  
 
 ```{r echo=TRUE}
-par(mfrow = c(1, 2), mar = c(12, 5, 3, 2), mgp = c(3, 1, 0), cex = 0.8, las = 3)
+
+par(mfrow = c(1, 2), mar = c(12, 5, 3, 2), mgp = c(3, 1, 0), cex = 1.0, las = 3, cex.lab=2, cex.main=2.5)
 
 prdmgplot <- barplot((prevntTop10$propDMG/1000000000), names.arg = prevntTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities (Billions)', log="y")
 crdmgplot <- barplot((crevntTop10$cropDMG/1000000000), names.arg = crevntTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries (Billions)', log="y")
