@@ -1,5 +1,5 @@
 ---
-title: "Storm and Weather Events Data Analysis (collected since 1970 - 2011)"
+title: "NOAA Storm Events Database Analysis (1970 - 2011)"
 output: 
 html_document:
 keep_md: true
@@ -53,8 +53,8 @@ Data from file:
 
 Filtering required columns from dataframe for analysis. Ploting histogram to understand the data available for each year in U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database (from 1970-2011). 
 
-```{r global_opts, include=FALSE}
-knitr::opts_chunk$set(fig.width=20, fig.height=15, fig.path='figs/', warning=FALSE, message=FALSE)
+```{r global_opts, echo=TRUE}
+knitr::opts_chunk$set(fig.width=40, fig.height=15, fig.path='figs/', warning=FALSE, message=FALSE)
 ```
 
 ```{r 'dataforanalysis', echo=TRUE}
@@ -217,6 +217,12 @@ par(mfrow = c(1, 2), mar = c(12, 5, 3, 2), mgp = c(3, 1, 0), cex = 0.8, las = 3)
 prdmgplot <- barplot((prevntTop10$propDMG/1000000000), names.arg = prevntTop10$Event, main = 'Top 10 events for fatalities', ylab = 'Number of fatalities (Billions)', log="y")
 crdmgplot <- barplot((crevntTop10$cropDMG/1000000000), names.arg = crevntTop10$Event, main = 'Top 10 events for injuries', ylab = 'Number of injuries (Billions)', log="y")
 ```  
+
+#Conclusion  
+
+This report shows that Flash Flood, Thunderstorm Winds, Tornado, Hail, Lightning, and Flood weather events caused huge property damage (billions of dollars) across the United States.  
+Drought, Flood, River flood, Ice Storm, Hurricane, Hurricane, and Typhoon events effected population health across the United States. Building the necessary infrastructure to predict weather events early, keeping necessary equipment, medication, and publishing safety precautions could help reducing population health problems.
+
 
 *Execute below script in commandline (or R console) to generate plot images and place them in './figure' folder  
 knit2html("PA2_template.Rmd", "PA2_template.html")*  
